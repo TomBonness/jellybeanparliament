@@ -5,7 +5,7 @@ backend:
       commands:
         - npm ci
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
-        - node -e "const fs=require('node:fs'); const out=JSON.parse(fs.readFileSync('amplify_outputs.json','utf8')); const custom=out.custom || {}; const rows=[]; if (custom.jellybeanPuzzlesTableName) rows.push(`JELLYBEAN_PUZZLES_TABLE_NAME=${custom.jellybeanPuzzlesTableName}`); if (custom.jellybeanGuessesTableName) rows.push(`JELLYBEAN_GUESSES_TABLE_NAME=${custom.jellybeanGuessesTableName}`); if (rows.length) fs.appendFileSync('.env.production', `${rows.join('\n')}\n`);"
+        - node -e "const fs=require('node:fs'); const out=JSON.parse(fs.readFileSync('amplify_outputs.json','utf8')); const custom=out.custom || {}; const rows=[]; if (custom.jellybeanPuzzlesTableName) rows.push('JELLYBEAN_PUZZLES_TABLE_NAME=' + custom.jellybeanPuzzlesTableName); if (custom.jellybeanGuessesTableName) rows.push('JELLYBEAN_GUESSES_TABLE_NAME=' + custom.jellybeanGuessesTableName); if (rows.length) fs.appendFileSync('.env.production', rows.join('\\n') + '\\n');"
 frontend:
   phases:
     preBuild:

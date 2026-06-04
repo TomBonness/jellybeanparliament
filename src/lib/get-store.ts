@@ -32,6 +32,10 @@ function readOutputString(key: string): string | undefined {
 }
 
 export function getStore(): ParliamentStore {
+  if (process.env.NODE_ENV === "test" || process.env.VITEST) {
+    return getMemoryStore();
+  }
+
   const puzzlesTableName = process.env.JELLYBEAN_PUZZLES_TABLE_NAME
     ?? readOutputString("jellybeanPuzzlesTableName")
     ?? readOutputString("JELLYBEAN_PUZZLES_TABLE_NAME");
