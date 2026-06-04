@@ -1,0 +1,43 @@
+{
+  "name": "jellybeanparliament",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint eslint.config.mjs --max-warnings=0",
+    "typecheck": "tsc --project tsconfig.typecheck.json --noEmit --incremental false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-amplify/backend": "latest",
+    "@aws-sdk/client-dynamodb": "latest",
+    "@aws-sdk/lib-dynamodb": "latest",
+    "@react-three/drei": "latest",
+    "@react-three/fiber": "latest",
+    "aws-cdk-lib": "latest",
+    "constructs": "latest",
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "latest"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend-cli": "^1.8.3",
+    "@eslint/eslintrc": "latest",
+    "@testing-library/react": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/three": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "^15.3.0",
+    "globals": "^17.6.0",
+    "jsdom": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}
