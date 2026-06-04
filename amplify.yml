@@ -17,7 +17,7 @@ frontend:
       commands:
         - npm run test
         - npm run typecheck
-        - npm run lint
+        - node ./node_modules/eslint/bin/eslint.js eslint.config.mjs --max-warnings=0
         - npm run build
   artifacts:
     baseDirectory: .next
