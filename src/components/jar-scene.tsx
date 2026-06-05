@@ -1,7 +1,7 @@
 "use client";
 
 import { OrbitControls } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Color, Group, Object3D, Vector2, type InstancedMesh } from "three";
 import { createBallRenderData } from "@/lib/puzzle";
@@ -14,6 +14,27 @@ type JarSceneProps = {
 type BeanCloudProps = JarSceneProps & {
   reducedMotion: boolean;
 };
+
+const DEFAULT_CAMERA_Y = 1.1;
+const DEFAULT_CAMERA_Z = 7.8;
+const MIN_COMFORTABLE_ASPECT = 0.82;
+
+function ResponsiveCamera() {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    const aspect = size.width / Math.max(size.height, 1);
+    const narrowViewportScale = aspect < MIN_COMFORTABLE_ASPECT ? MIN_COMFORTABLE_ASPECT / aspect : 1;
+    const distance = Math.min(12, DEFAULT_CAMERA_Z * narrowViewportScale);
+
+    camera.position.set(0, DEFAULT_CAMERA_Y, distance);
+    if ("updateProjectionMatrix" in camera) {
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, size.height, size.width]);
+
+  return null;
+}
 
 function BeanCloud({ seed, palette, reducedMotion }: BeanCloudProps) {
   const groupRef = useRef<Group>(null);
@@ -115,14 +136,15 @@ export function JarScene({ seed, palette }: JarSceneProps) {
 
   return (
     <div className="jar-scene" role="img" aria-label="Interactive 3D jar filled with colored jellybean marbles.">
-      <Canvas camera={{ position: [0, 1.1, 7.8], fov: 42 }} shadows dpr={[1, 2]}>
+      <Canvas camera={{ position: [0, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_Z], fov: 42 }} shadows dpr={[1, 2]}>
         <color attach="background" args={["#f8f5ec"]} />
+        <ResponsiveCamera />
         <ambientLight intensity={0.9} />
         <directionalLight position={[3, 5, 4]} intensity={1.35} castShadow />
         <pointLight position={[-3, 2, -2]} intensity={0.7} color="#f1c40f" />
         <BeanCloud seed={seed} palette={palette} reducedMotion={reducedMotion} />
         <JarGlass />
-        <OrbitControls enablePan={false} minDistance={4.2} maxDistance={8} minPolarAngle={0.72} maxPolarAngle={2.28} autoRotate={!reducedMotion} autoRotateSpeed={0.45} />
+        <OrbitControls enablePan={false} minDistance={4.2} maxDistance={12} minPolarAngle={0.72} maxPolarAngle={2.28} autoRotate={!reducedMotion} autoRotateSpeed={0.45} />
       </Canvas>
       <p className="canvas-fallback">Drag, scroll, or use trackpad gestures to rotate and inspect the generated jar.</p>
     </div>
