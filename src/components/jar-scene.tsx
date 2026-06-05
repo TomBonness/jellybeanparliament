@@ -3,7 +3,7 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Color, Group, Object3D, type InstancedMesh } from "three";
+import { Color, Group, Object3D, Vector2, type InstancedMesh } from "three";
 import { createBallRenderData } from "@/lib/puzzle";
 
 type JarSceneProps = {
@@ -64,23 +64,39 @@ function BeanCloud({ seed, palette, reducedMotion }: BeanCloudProps) {
 }
 
 function JarGlass() {
+  const jarProfile = useMemo(
+    () => [
+      new Vector2(1.54, -2.02),
+      new Vector2(1.66, -1.86),
+      new Vector2(1.66, 0.94),
+      new Vector2(1.52, 1.2),
+      new Vector2(1.24, 1.5),
+      new Vector2(1.16, 1.96),
+    ],
+    [],
+  );
+
   return (
     <group>
       <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[1.82, 1.58, 4.1, 96, 1, true]} />
-        <meshPhysicalMaterial color="#ffffff" roughness={0.02} transmission={0.75} thickness={0.38} transparent opacity={0.28} />
+        <latheGeometry args={[jarProfile, 96]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.78} metalness={0} transparent opacity={0.2} depthWrite={false} />
       </mesh>
-      <mesh position={[0, -2.08, 0]}>
-        <cylinderGeometry args={[1.62, 1.62, 0.08, 96]} />
-        <meshStandardMaterial color="#111111" roughness={0.36} metalness={0.12} />
+      <mesh position={[0, -2.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.54, 0.035, 12, 96]} />
+        <meshStandardMaterial color="#111111" roughness={0.46} metalness={0.08} />
       </mesh>
-      <mesh position={[0, 2.12, 0]}>
-        <cylinderGeometry args={[1.22, 1.38, 0.34, 96]} />
-        <meshStandardMaterial color="#111111" roughness={0.28} metalness={0.18} />
+      <mesh position={[0, 1.96, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.16, 0.035, 12, 96]} />
+        <meshStandardMaterial color="#111111" roughness={0.44} metalness={0.08} />
       </mesh>
-      <mesh position={[0, 2.36, 0]}>
-        <cylinderGeometry args={[1.32, 1.22, 0.12, 96]} />
-        <meshStandardMaterial color="#f8f5ec" roughness={0.2} metalness={0.25} />
+      <mesh position={[0, 2.16, 0]}>
+        <cylinderGeometry args={[1.22, 1.22, 0.28, 96]} />
+        <meshStandardMaterial color="#f8f5ec" roughness={0.34} metalness={0.16} />
+      </mesh>
+      <mesh position={[0, 2.34, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.22, 0.055, 12, 96]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} metalness={0.16} />
       </mesh>
     </group>
   );

@@ -27,6 +27,34 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const ISO_WEEK_ONE_MONTH = 0;
 const ISO_WEEK_ONE_DAY = 4;
 const DEFAULT_PALETTE = ["#e63946", "#f1c40f", "#1d4ed8", "#111111", "#f8f5ec"] as const;
+export const BALL_RENDER_SCALE = 0.135;
+export const BALL_CENTER_GAP = 0.018;
+export const BALL_MIN_CENTER_DISTANCE = BALL_RENDER_SCALE * 2 + BALL_CENTER_GAP;
+export const JAR_PACK_BOTTOM_Y = -1.56;
+export const JAR_PACK_TOP_Y = 1.78;
+
+const JAR_BODY_INNER_RADIUS = 1.52;
+const JAR_NECK_INNER_RADIUS = 1.08;
+const JAR_SHOULDER_START_Y = 1.02;
+
+export function getJarProfileRadius(y: number): number {
+  if (y <= JAR_SHOULDER_START_Y) {
+    return JAR_BODY_INNER_RADIUS;
+  }
+
+  const shoulderProgress = Math.min(1, (y - JAR_SHOULDER_START_Y) / (JAR_PACK_TOP_Y - JAR_SHOULDER_START_Y));
+  return JAR_BODY_INNER_RADIUS + (JAR_NECK_INNER_RADIUS - JAR_BODY_INNER_RADIUS) * shoulderProgress;
+}
+
+function shuffleLayer<T>(items: T[], random: () => number): T[] {
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [items[index], items[swapIndex]] = [items[swapIndex] as T, items[index] as T];
+  }
+
+  return items;
+}
+
 
 export function getIsoWeekPuzzleId(date = new Date()): string {
   const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -121,25 +149,51 @@ export function toPublicPuzzle(puzzle: Puzzle): PublicPuzzle {
 export function createBallRenderData(seed: string, palette: readonly string[]): BallRenderData[] {
   const count = deriveTrueCount(seed);
   const random = createRandom(`${seed}:layout`);
-  const balls: BallRenderData[] = new Array(count);
-  const jarRadius = 1.62;
-  const fillHeight = 3.25;
-  const bottom = -1.55;
+  const balls: BallRenderData[] = [];
+  const rowSpacing = BALL_MIN_CENTER_DISTANCE * Math.sqrt(3) * 0.5;
+  const layerSpacing = BALL_MIN_CENTER_DISTANCE;
 
-  for (let index = 0; index < count; index += 1) {
-    const yProgress = index / Math.max(1, count - 1);
-    const y = bottom + yProgress * fillHeight + (random() - 0.5) * 0.12;
-    const neckTaper = y > 1.0 ? 1 - (y - 1.0) * 0.16 : 1;
-    const radiusLimit = Math.max(0.78, jarRadius * neckTaper);
-    const radius = Math.sqrt(random()) * radiusLimit;
-    const theta = random() * Math.PI * 2;
-    balls[index] = {
-      x: Math.cos(theta) * radius,
-      y,
-      z: Math.sin(theta) * radius,
-      scale: 0.105 + random() * 0.035,
-      color: palette[Math.floor(random() * palette.length)] ?? DEFAULT_PALETTE[0],
-    };
+  for (let layer = 0; balls.length < count; layer += 1) {
+    const y = JAR_PACK_BOTTOM_Y + BALL_RENDER_SCALE + layer * layerSpacing;
+    if (y > JAR_PACK_TOP_Y - BALL_RENDER_SCALE) {
+      throw new Error(`Packed jar capacity exceeded for ${count} balls`);
+    }
+
+    const radiusLimit = getJarProfileRadius(y) - BALL_RENDER_SCALE;
+    const layerRotation = random() * Math.PI * 2;
+    const layerOffsetX = (random() - 0.5) * BALL_MIN_CENTER_DISTANCE;
+    const layerOffsetZ = (random() - 0.5) * rowSpacing;
+    const layerCandidates: Array<{ x: number; z: number }> = [];
+    let rowIndex = 0;
+
+    for (let z = -radiusLimit; z <= radiusLimit; z += rowSpacing) {
+      const xOffset = ((rowIndex + layer) % 2) * BALL_MIN_CENTER_DISTANCE * 0.5;
+      for (let x = -radiusLimit; x <= radiusLimit; x += BALL_MIN_CENTER_DISTANCE) {
+        const shiftedX = x + xOffset + layerOffsetX;
+        const shiftedZ = z + layerOffsetZ;
+        const rotatedX = shiftedX * Math.cos(layerRotation) - shiftedZ * Math.sin(layerRotation);
+        const rotatedZ = shiftedX * Math.sin(layerRotation) + shiftedZ * Math.cos(layerRotation);
+
+        if (Math.hypot(rotatedX, rotatedZ) <= radiusLimit) {
+          layerCandidates.push({ x: rotatedX, z: rotatedZ });
+        }
+      }
+      rowIndex += 1;
+    }
+
+    for (const candidate of shuffleLayer(layerCandidates, random)) {
+      if (balls.length >= count) {
+        break;
+      }
+
+      balls.push({
+        x: candidate.x,
+        y,
+        z: candidate.z,
+        scale: BALL_RENDER_SCALE,
+        color: palette[Math.floor(random() * palette.length)] ?? DEFAULT_PALETTE[0],
+      });
+    }
   }
 
   return balls;
