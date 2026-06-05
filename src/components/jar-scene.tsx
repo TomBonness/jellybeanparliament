@@ -115,7 +115,7 @@ export function JarScene({ seed, palette }: JarSceneProps) {
 
   return (
     <div className="jar-scene" role="img" aria-label="Interactive 3D jar filled with colored jellybean marbles.">
-      <Canvas camera={{ position: [0, 1.1, 6.2], fov: 42 }} shadows dpr={[1, 2]}>
+      <Canvas camera={{ position: [0, 1.1, 7.8], fov: 42 }} shadows dpr={[1, 2]}>
         <color attach="background" args={["#f8f5ec"]} />
         <ambientLight intensity={0.9} />
         <directionalLight position={[3, 5, 4]} intensity={1.35} castShadow />
