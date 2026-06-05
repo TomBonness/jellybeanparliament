@@ -5,6 +5,7 @@ type StatsPanelProps = {
 };
 
 const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const wholeNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 export function StatsPanel({ reveal }: StatsPanelProps) {
   const stats = reveal.stats;
@@ -21,12 +22,12 @@ export function StatsPanel({ reveal }: StatsPanelProps) {
           </div>
           <div className="stats-spotlight__crowd stats-spotlight__crowd--primary">
             <dt>Crowd median</dt>
-            <dd>{numberFormatter.format(stats.median)}</dd>
+            <dd>{wholeNumberFormatter.format(stats.median)}</dd>
             <small>{numberFormatter.format(stats.crowdMedianPercentageError)}% error</small>
           </div>
           <div className="stats-spotlight__crowd">
             <dt>Crowd mean</dt>
-            <dd>{numberFormatter.format(stats.mean)}</dd>
+            <dd>{wholeNumberFormatter.format(stats.mean)}</dd>
             <small>{numberFormatter.format(stats.crowdMeanPercentageError)}% error</small>
           </div>
         </dl>
